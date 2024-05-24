@@ -63,7 +63,7 @@ schedy_heating:
   rooms:
 
     living:
-      rescheduling_delay: 180
+      rescheduling_delay: 90
       actors:
         climate.thermostat:
           hvac_mode_on: auto
