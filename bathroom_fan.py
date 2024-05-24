@@ -2,18 +2,20 @@ import appdaemon.plugins.hass.hassapi as hass
 import math
 
 #
-# App to Turn on bathroom fan when bathroom humidity is beyond threshold
+# App to Turn on bathroom exhaust fan when bathroom humidity is beyond threshold and turn it back off automatically
+# Calculates and compares absolute humidity between bathroom and living space
+# Seperate power off delays for either case of automatic or manual fan activation
 #
 # Args:
 #
 # app_switch: on/off switch for this app. eg: input_boolean.auto_bathroom_fan
-# bathroom_humidity_sensor: bathroom humidity sensor to monitor. eg: sensor.bathroom_humidity
+# bathroom_humidity_sensor: bathroom humidity sensor to monitor. eg: sensor.4_in_1_sensor_humidity
 # bathroom_temperature_sensor: bathroom temperature sensor. eg: sensor.4_in_1_sensor_air_temperature
-# living_humidity_sensor: living space humidity sensor to monitor. eg: sensor.living_humidity
+# living_humidity_sensor: living space humidity sensor to monitor. eg: sensor.temp_sensor_upper_humidity
 # living_temperature_sensor: living temperature sensor. eg: sensor.temp_sensor_upper_air_temperature
-# threshold: threshold at which fan is activated. eg: 18
-# lower_threshold: threshold at which actor power off is scheduled. eg: 8
-# actor: actor to turn on eg: switch.mini_plug
+# threshold: the absolute humidity threshold at which fan is activated. eg: 3.54 (g/m3)
+# lower_threshold: the absolute humidity threshold at which fan power off is scheduled. eg: 1.377 (g/m3)
+# actor: actor to turn on eg: switch.bathroom_fan
 # delay: seconds to wait before turning off actor when turned on automatically. eg: 60
 # manual_delay: seconds to wait before turning off actor when turned on manually. eg: 600
 
