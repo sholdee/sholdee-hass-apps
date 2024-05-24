@@ -1,0 +1,80 @@
+Occupancy Simulator:
+  module: occusim
+  class: OccuSim
+  log_msg: '1'
+  #notify: '1'
+  enable: input_boolean.occusim,on
+  dump_times: '1'
+  reset_time: '00:00:01'
+
+  step_evening_name: Evening
+  step_evening_start: '18:30:00'
+
+  random_kitchen_start: Evening
+  random_kitchen_name: Evening kitchen
+  random_kitchen_number: '3'
+  random_kitchen_minduration: 00:05:00
+  random_kitchen_maxduration: 01:00:00
+  random_kitchen_off_1: switch.kitchen_lights
+  random_kitchen_on_1: switch.kitchen_lights
+  random_kitchen_end: Night
+
+  random_livingroom_start: Evening
+  random_livingroom_name: Evening living room
+  random_livingroom_number: '1'
+  random_livingroom_minduration: 01:00:00
+  random_livingroom_maxduration: 02:00:00
+  random_livingroom_off_1: light.living_room_light
+  random_livingroom_on_1: light.living_room_light
+  random_livingroom_end: Night
+
+  #random_bedroom_start: Evening
+  #random_bedroom_name: Evening bedroom
+  #random_bedroom_number: '1'
+  #random_bedroom_minduration: 01:00:00
+  #random_bedroom_maxduration: 02:00:00
+  #random_bedroom_off_1: switch.mini_plug_2
+  #random_bedroom_on_1: switch.mini_plug_2
+  #random_bedroom_end: Night
+
+  step_night_name: Night
+  step_night_start: '23:30:00'
+  step_night_end: '23:59:59'
+
+  step_latenight_name: Late night
+  step_latenight_start: '00:00:30'
+  step_latenight_end: '05:00:00'
+
+  #random_floodlight_name: Flood light
+  #random_floodlight_start: Late night
+  #random_floodlight_number: '1'
+  #random_floodlight_minduration: 00:15:00
+  #random_floodlight_maxduration: 00:45:00
+  #random_floodlight_off_1: switch.rear_floodlight
+  #random_floodlight_on_1: switch.rear_floodlight
+  #random_floodlight_end: Morning
+
+  step_morning_name: Morning
+  step_morning_start: '06:00:00'
+  step_morning_end: '08:00:00'
+  #random_bedroomday_start: Morning
+  #random_bedroomday_name: Morning bedroom
+  #random_bedroomday_number: '1'
+  #random_bedroomday_minduration: 00:15:00
+  #random_bedroomday_maxduration: 01:00:00
+  #random_bedroomday_off_1: switch.mini_plug_2
+  #random_bedroomday_on_1: switch.mini_plug_2
+  #random_bedroomday_end: Mid morning
+
+  random_kitchenday_start: Morning
+  random_kitchenday_name: Morning kitchen
+  random_kitchenday_number: '1'
+  random_kitchenday_minduration: 00:15:00
+  random_kitchenday_maxduration: 01:00:00
+  random_kitchenday_off_1: switch.kitchen_lights
+  random_kitchenday_on_1: switch.kitchen_lights
+  random_kitchenday_end: Mid morning
+
+  step_midmorning_name: Mid morning
+  step_midmorning_start: '08:00:00'
+  step_midmorning_end: '10:00:00'

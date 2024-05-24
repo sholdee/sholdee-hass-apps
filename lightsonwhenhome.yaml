@@ -1,0 +1,12 @@
+lights_on_when_home:
+  module: lights_on_when_home
+  class: LightsOnWhenHome
+  
+  homesensors:
+    - group.ethan
+    - group.hannah
+
+  lights:
+    - switch.rear_floodlight
+    - switch.kitchen_lights_2
+    - switch.kitchen_lights

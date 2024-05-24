@@ -1,0 +1,110 @@
+schedy_heating:
+  module: hass_apps_loader
+  class: SchedyApp
+
+  reset_at_startup: true
+  #log_level: DEBUG
+
+  actor_type: dualthermostat
+  
+  expression_environment: |
+    def people_status():
+        peoplestatus = "not_home"
+        people = [
+            state("person.ethan"), 
+            state("person.hannah"), 
+            state("device_tracker.ethan_s23_unifi"), 
+            state("device_tracker.hannah_s10"),
+            state("device_tracker.josh_phone")
+        ]
+        for person in people:
+            if person == "home":
+                peoplestatus = "home"
+                break
+        return peoplestatus
+    def guest_mode():
+        return state("input_boolean.guestmode")
+    def outside_temp():
+        try:
+            temp = float(state("sensor.temp_sensor_outside_air_temperature"))
+        except:
+            try:
+                temp = float(state("sensor.weather_temperature"))
+            except:
+                temp = 0
+        return temp
+    def forecast_max():
+        try:
+            temp = float(state("sensor.home_realfeel_temperature_max_0d"))
+        except:
+            temp = 0
+        return temp
+    def door_is_open_for_long():
+        return state("input_boolean.door_open_long") == "on"
+    def door_is_closed_for_long():
+        return state("input_boolean.door_closed_long") == "on"
+    def door_is_open():
+        return state("binary_sensor.sliding_door_sensor_window_door_is_open") == "on"
+
+  watched_entities:
+  - sensor.weather_temperature
+  - input_boolean.guestmode
+  - sensor.temp_sensor_outside_air_temperature
+  - person.ethan
+  - person.hannah
+  - device_tracker.ethan_s23_unifi
+  - device_tracker.hannah_s10
+  - device_tracker.josh_phone
+  - sensor.home_realfeel_temperature_max_0d
+  - binary_sensor.sliding_door_sensor_window_door_is_open
+  - input_boolean.door_open_long
+  - input_boolean.door_closed_long
+
+  rooms:
+
+    living:
+      rescheduling_delay: 180
+      actors:
+        climate.thermostat:
+          hvac_mode_on: auto
+      schedule:
+      - v: "on"
+        rules:
+        - rules:
+          - x: "Mark('off', Mark.OVERLAY) if door_is_open_for_long() or (not door_is_closed_for_long() and not door_is_open()) else Break()"
+        - rules:
+          - x: "Next() if (people_status() == 'home' or guest_mode() == 'on') and outside_temp() >= 75 else Break()"
+          - { v: [65,70], start: "07:00", end: "19:30", weekdays: 1-4 }
+          - { v: [65,68], start: "19:30", end: "07:00", weekdays: 1-4 }
+          - { v: [65,70], start: "07:00", end: "20:00", weekdays: 5-6 }
+          - { v: [65,68], start: "20:00", end: "07:00", weekdays: 5-6 }
+          - { v: [65,70], start: "07:00", end: "19:30", weekdays: 7 }
+          - { v: [65,68], start: "19:30", end: "07:00", weekdays: 7 }
+        - rules:
+          - x: "Next() if (people_status() == 'home' or guest_mode() == 'on') and outside_temp() >= 60 else Break()"
+          - { v: [68,72], start: "07:00", end: "19:30", weekdays: 1-4 }
+          - { v: [67,68], start: "19:30", end: "07:00", weekdays: 1-4 }
+          - { v: [68,72], start: "07:00", end: "20:00", weekdays: 5-6 }
+          - { v: [67,68], start: "20:00", end: "07:00", weekdays: 5-6 }
+          - { v: [68,72], start: "07:00", end: "19:30", weekdays: 7 }
+          - { v: [67,68], start: "19:30", end: "07:00", weekdays: 7 }
+        - rules:
+          - x: "Next() if (people_status() == 'home' or guest_mode() == 'on') and forecast_max() >= 65 else Break()"
+          - { v: [67,80], start: "07:00", end: "19:30", weekdays: 1-4 }
+          - { v: [67,80], start: "19:30", end: "07:00", weekdays: 1-4 }
+          - { v: [67,80], start: "07:00", end: "20:00", weekdays: 5-6 }
+          - { v: [67,80], start: "20:00", end: "07:00", weekdays: 5-6 }
+          - { v: [67,80], start: "07:00", end: "19:30", weekdays: 7 }
+          - { v: [67,80], start: "19:30", end: "07:00", weekdays: 7 }
+        - rules:
+          - x: "Next() if people_status() == 'home' or guest_mode() == 'on' else Break()"
+          - { v: [70,80], start: "07:00", end: "19:30", weekdays: 1-4 }
+          - { v: [67,80], start: "19:30", end: "07:00", weekdays: 1-4 }
+          - { v: [70,80], start: "07:00", end: "20:00", weekdays: 5-6 }
+          - { v: [67,80], start: "20:00", end: "07:00", weekdays: 5-6 }
+          - { v: [70,80], start: "07:00", end: "19:30", weekdays: 7 }
+          - { v: [67,80], start: "19:30", end: "07:00", weekdays: 7 }
+        - rules:
+          - x: "Next() if outside_temp() >= 60 else Break()"
+          - v: [60,75]
+      - v: [62,80]
