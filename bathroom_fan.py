@@ -10,8 +10,8 @@ Args:
     living_humidity_sensor: living space humidity sensor to monitor. eg: sensor.temp_sensor_upper_humidity
     living_temperature_sensor: living temperature sensor. eg: sensor.temp_sensor_upper_air_temperature
     temperature_unit: the temperature unit (F/C) of sensor data. eg: F
-    threshold: the absolute humidity threshold at which fan is activated. eg: 3.54 (g/m³)
-    lower_threshold: the absolute humidity threshold at which fan power off is scheduled. eg: 1.377 (g/m³)
+    threshold: the absolute humidity threshold at which fan is activated. (g/m³) eg: 3.54
+    lower_threshold: the absolute humidity threshold at which fan power off is scheduled. (g/m³) eg: 1.377
     actor: actor to turn on eg: switch.bathroom_fan
     delay: seconds to wait before turning off actor when turned on automatically. eg: 60
     manual_delay: seconds to wait before turning off actor when turned on manually. eg: 600
