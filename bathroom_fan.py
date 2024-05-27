@@ -1,26 +1,29 @@
+"""
+AppDaemon module to turn on bathroom exhaust fan when bathroom humidity is beyond threshold and turn it back off automatically
+Calculates and compares absolute humidity between bathroom and living space
+Separate power off delays for either case of automatic or manual fan activation
+
+Args:
+    app_switch: on/off switch for this app. eg: input_boolean.auto_bathroom_fan
+    bathroom_humidity_sensor: bathroom humidity sensor to monitor. eg: sensor.4_in_1_sensor_humidity
+    bathroom_temperature_sensor: bathroom temperature sensor. eg: sensor.4_in_1_sensor_air_temperature
+    living_humidity_sensor: living space humidity sensor to monitor. eg: sensor.temp_sensor_upper_humidity
+    living_temperature_sensor: living temperature sensor. eg: sensor.temp_sensor_upper_air_temperature
+    threshold: the absolute humidity threshold at which fan is activated. eg: 3.54 (g/m³)
+    lower_threshold: the absolute humidity threshold at which fan power off is scheduled. eg: 1.377 (g/m³)
+    actor: actor to turn on eg: switch.bathroom_fan
+    delay: seconds to wait before turning off actor when turned on automatically. eg: 60
+    manual_delay: seconds to wait before turning off actor when turned on manually. eg: 600
+"""
+
 import appdaemon.plugins.hass.hassapi as hass
 import math
 
-#
-# App to Turn on bathroom exhaust fan when bathroom humidity is beyond threshold and turn it back off automatically
-# Calculates and compares absolute humidity between bathroom and living space
-# Seperate power off delays for either case of automatic or manual fan activation
-#
-# Args:
-#
-# app_switch: on/off switch for this app. eg: input_boolean.auto_bathroom_fan
-# bathroom_humidity_sensor: bathroom humidity sensor to monitor. eg: sensor.4_in_1_sensor_humidity
-# bathroom_temperature_sensor: bathroom temperature sensor. eg: sensor.4_in_1_sensor_air_temperature
-# living_humidity_sensor: living space humidity sensor to monitor. eg: sensor.temp_sensor_upper_humidity
-# living_temperature_sensor: living temperature sensor. eg: sensor.temp_sensor_upper_air_temperature
-# threshold: the absolute humidity threshold at which fan is activated. eg: 3.54 (g/m3)
-# lower_threshold: the absolute humidity threshold at which fan power off is scheduled. eg: 1.377 (g/m3)
-# actor: actor to turn on eg: switch.bathroom_fan
-# delay: seconds to wait before turning off actor when turned on automatically. eg: 60
-# manual_delay: seconds to wait before turning off actor when turned on manually. eg: 600
-
 class BathroomFan(hass.Hass):
+    """Class to control bathroom exhaust fan based on humidity levels."""
+    
     def initialize(self):
+        """Initializes the BathroomFan app."""
         self.listen_state_handle_list = []
         self.timer_handle_list = []
         self.manual_turn_off_timer_handle = None
@@ -55,6 +58,7 @@ class BathroomFan(hass.Hass):
         self.log_initial_state()
 
     def log_initial_state(self):
+        """Logs the initial state of the app and sensors."""
         self.log(
             f"Bathroom fan app initialized. App switch: {self.get_state(self.app_switch)} "
             f"Bathroom humidity: {self.get_state(self.bathroom_humidity_sensor)} "
@@ -68,6 +72,16 @@ class BathroomFan(hass.Hass):
         )
 
     def state_change(self, entity, attribute, old, new, kwargs):
+        """
+        Handles state changes for monitored entities.
+        
+        Args:
+            entity (str): The entity that changed state.
+            attribute (str): The attribute that changed.
+            old (str): The old state value.
+            new (str): The new state value.
+            kwargs (dict): Additional keyword arguments.
+        """
         self.log(f"State change detected for {entity}: {old} -> {new}")
     
         if self.get_state(self.app_switch) != "on":
@@ -110,6 +124,15 @@ class BathroomFan(hass.Hass):
                 self.handle_fan_turn_off(humidity_difference, self.lower_threshold)
 
     def get_valid_state(self, entity):
+        """
+        Retrieves and validates the state of a given entity.
+        
+        Args:
+            entity (str): The entity to retrieve the state from.
+        
+        Returns:
+            float: The valid state value or None if invalid.
+        """
         state = self.get_state(entity)
         if state not in [None, "unknown", "unavailable"]:
             try:
@@ -119,6 +142,16 @@ class BathroomFan(hass.Hass):
         return None
 
     def calculate_absolute_humidity(self, relative_humidity, temperature_fahrenheit):
+        """
+        Calculates the absolute humidity from relative humidity and temperature.
+        
+        Args:
+            relative_humidity (float): The relative humidity percentage.
+            temperature_fahrenheit (float): The temperature in Fahrenheit.
+        
+        Returns:
+            float: The calculated absolute humidity in g/m³.
+        """
         # Convert temperature from Fahrenheit to Kelvin
         temperature_kelvin = (temperature_fahrenheit - 32) * 5/9 + 273.15
         # Calculate saturation vapor pressure in pascals (Pa)
@@ -133,12 +166,24 @@ class BathroomFan(hass.Hass):
         return absolute_humidity
 
     def schedule_manual_turn_off(self, humidity_difference):
+        """
+        Schedules the manual turn off of the fan.
+        
+        Args:
+            humidity_difference (float): The current humidity difference.
+        """
         if not self.manual_turn_off_timer_handle:
             self.log(f"Scheduling manual turn off in {self.manual_delay} seconds.")
             self.manual_turn_off_timer_handle = self.run_in(self.manual_turn_off_callback, self.manual_delay, humidity_difference=humidity_difference)
             self.timer_handle_list.append(self.manual_turn_off_timer_handle)
 
     def manual_turn_off_callback(self, kwargs):
+        """
+        Callback for manually turning off the fan.
+        
+        Args:
+            kwargs (dict): Additional keyword arguments containing humidity difference.
+        """
         humidity_difference = kwargs["humidity_difference"]
         current_bathroom_humidity = self.get_valid_state(self.bathroom_humidity_sensor)
         current_living_humidity = self.get_valid_state(self.living_humidity_sensor)
@@ -163,6 +208,13 @@ class BathroomFan(hass.Hass):
         self.manual_turn_off_timer_handle = None
 
     def handle_fan_turn_on(self, humidity_difference, threshold):
+        """
+        Handles turning on the fan based on humidity difference.
+        
+        Args:
+            humidity_difference (float): The current humidity difference.
+            threshold (float): The threshold humidity difference for turning on the fan.
+        """
         if self.get_state(self.actor) != "on":
             self.log(
                 f"{self.friendly_name(self.bathroom_humidity_sensor)} absolute humidity is {humidity_difference} higher than "
@@ -179,6 +231,13 @@ class BathroomFan(hass.Hass):
             self.humidity_turn_off_timer_handle = None
 
     def handle_fan_turn_off(self, humidity_difference, lower_threshold):
+        """
+        Handles turning off the fan based on humidity difference.
+        
+        Args:
+            humidity_difference (float): The current humidity difference.
+            lower_threshold (float): The lower threshold humidity difference for turning off the fan.
+        """
         if not self.humidity_turn_off_timer_handle and self.get_state(self.actor) != "off":
             self.log(
                 f"{self.friendly_name(self.bathroom_humidity_sensor)} absolute humidity is {humidity_difference} higher than "
@@ -189,12 +248,19 @@ class BathroomFan(hass.Hass):
             self.timer_handle_list.append(self.humidity_turn_off_timer_handle)
 
     def turn_off_callback(self, kwargs):
+        """
+        Callback for turning off the fan.
+        
+        Args:
+            kwargs (dict): Additional keyword arguments.
+        """
         self.log(f"Turning off {self.friendly_name(self.actor)}")
         self.turn_off(self.actor)
         self.humidity_turn_off_timer_handle = None
         self.auto_activated = False  # Reset the auto-activated flag
 
     def terminate(self):
+        """Terminates the app and cancels all listeners and timers."""
         for handle in self.listen_state_handle_list:
             self.cancel_listen_state(handle)
         for handle in self.timer_handle_list:
