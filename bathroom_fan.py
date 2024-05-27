@@ -70,7 +70,8 @@ class BathroomFan(hass.Hass):
             f"Threshold: {self.threshold} "
             f"Lower threshold: {self.lower_threshold} "
             f"Delay: {self.delay} "
-            f"Manual Delay: {self.manual_delay}"
+            f"Manual Delay: {self.manual_delay} "
+            f"Temperature unit: {self.temperature_unit}"
         )
 
     def state_change(self, entity, attribute, old, new, kwargs):
