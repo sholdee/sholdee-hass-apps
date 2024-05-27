@@ -6,7 +6,7 @@ schedy_heating:
   #log_level: DEBUG
 
   actor_type: dualthermostat
-  
+
   expression_environment: |
     def people_status():
         peoplestatus = "not_home"
@@ -67,6 +67,9 @@ schedy_heating:
       actors:
         climate.thermostat:
           hvac_mode_on: auto
+          send_retries: 7
+          send_retry_interval: 1
+          #delta: [1,1]
       schedule:
       - v: "on"
         rules:
