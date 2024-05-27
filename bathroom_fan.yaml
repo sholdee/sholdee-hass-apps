@@ -7,6 +7,7 @@ bathroom_fan:
   bathroom_temperature_sensor: sensor.4_in_1_sensor_air_temperature
   living_humidity_sensor: sensor.temp_sensor_upper_humidity
   living_temperature_sensor: sensor.temp_sensor_upper_air_temperature
+  temperature_unit: F
   threshold: 3.54
   lower_threshold: 1.377
   actor: switch.bathroom_fan

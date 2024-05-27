@@ -9,6 +9,7 @@ Args:
     bathroom_temperature_sensor: bathroom temperature sensor. eg: sensor.4_in_1_sensor_air_temperature
     living_humidity_sensor: living space humidity sensor to monitor. eg: sensor.temp_sensor_upper_humidity
     living_temperature_sensor: living temperature sensor. eg: sensor.temp_sensor_upper_air_temperature
+    temperature_unit: the temperature unit (F/C) of sensor data. eg: F
     threshold: the absolute humidity threshold at which fan is activated. eg: 3.54 (g/m³)
     lower_threshold: the absolute humidity threshold at which fan power off is scheduled. eg: 1.377 (g/m³)
     actor: actor to turn on eg: switch.bathroom_fan
@@ -35,6 +36,7 @@ class BathroomFan(hass.Hass):
         self.living_humidity_sensor = self.args["living_humidity_sensor"]
         self.bathroom_temperature_sensor = self.args["bathroom_temperature_sensor"]
         self.living_temperature_sensor = self.args["living_temperature_sensor"]
+        self.temperature_unit = self.args.get("temperature_unit", "F").upper()
         self.threshold = float(self.args["threshold"])
         self.lower_threshold = float(self.args["lower_threshold"])
         self.actor = self.args["actor"]
@@ -141,21 +143,28 @@ class BathroomFan(hass.Hass):
                 self.log(f"Invalid state value for {entity}: {state}")
         return None
 
-    def calculate_absolute_humidity(self, relative_humidity, temperature_fahrenheit):
+    def calculate_absolute_humidity(self, relative_humidity, temperature):
         """
         Calculates the absolute humidity from relative humidity and temperature.
         
         Args:
             relative_humidity (float): The relative humidity percentage.
-            temperature_fahrenheit (float): The temperature in Fahrenheit.
+            temperature (float): The temperature.
         
         Returns:
             float: The calculated absolute humidity in g/m³.
         """
-        # Convert temperature from Fahrenheit to Kelvin
-        temperature_kelvin = (temperature_fahrenheit - 32) * 5/9 + 273.15
+        if self.temperature_unit == "F":
+            # Convert temperature from Fahrenheit to Kelvin
+            temperature_kelvin = (temperature - 32) * 5/9 + 273.15
+            # Convert temperature from Fahrenheit to Celsius
+            temperature_celsius = (temperature - 32) / 1.8
+        else:
+            # Convert temperature from Celsius to Kelvin
+            temperature_kelvin = temperature + 273.15
+            temperature_celsius = temperature
+
         # Calculate saturation vapor pressure in pascals (Pa)
-        temperature_celsius = (temperature_fahrenheit - 32) / 1.8
         saturation_vapor_pressure = 6.112 * math.exp((17.67 * temperature_celsius) / (temperature_celsius + 243.5)) * 100  # Convert hPa to Pa
         # Calculate actual vapor pressure
         actual_vapor_pressure = (relative_humidity / 100) * saturation_vapor_pressure
