@@ -69,6 +69,7 @@ schedy_heating:
           hvac_mode_on: auto
           send_retries: 7
           send_retry_interval: 1
+          grace_period: 14
           #delta: [1,1]
       schedule:
       - v: "on"
