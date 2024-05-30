@@ -63,7 +63,7 @@ schedy_heating:
   rooms:
     living:
       rescheduling_delay: 90
-      grace_period: 14
+      grace_period: 120
       actors:
         climate.thermostat:
           hvac_mode_on: auto
