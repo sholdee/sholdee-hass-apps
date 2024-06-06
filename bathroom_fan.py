@@ -74,6 +74,14 @@ class BathroomFan(hass.Hass):
             f"Temperature unit: {self.temperature_unit}"
         )
 
+    def cancel_timer_handle(self, timer_handle_name):
+        """Cancels a timer and removes it from the timer handle list."""
+        timer_handle = getattr(self, timer_handle_name)
+        if timer_handle:
+            self.cancel_timer(timer_handle)
+            self.timer_handle_list.remove(timer_handle)
+            setattr(self, timer_handle_name, None)
+
     def state_change(self, entity, attribute, old, new, kwargs):
         """
         Handles state changes for monitored entities.
@@ -96,14 +104,8 @@ class BathroomFan(hass.Hass):
         if self.get_state(self.app_switch) != "on":
             # Cancel all timers and stop further processing
             self.log("App switch is off, cancelling all timers and stopping further processing.")
-            if self.manual_turn_off_timer_handle:
-                self.cancel_timer(self.manual_turn_off_timer_handle)
-                self.timer_handle_list.remove(self.manual_turn_off_timer_handle)
-                self.manual_turn_off_timer_handle = None
-            if self.humidity_turn_off_timer_handle:
-                self.cancel_timer(self.humidity_turn_off_timer_handle)
-                self.timer_handle_list.remove(self.humidity_turn_off_timer_handle)
-                self.humidity_turn_off_timer_handle = None
+            self.cancel_timer_handle("manual_turn_off_timer_handle")
+            self.cancel_timer_handle("humidity_turn_off_timer_handle")
             return
 
         bathroom_humidity = self.get_valid_state(self.bathroom_humidity_sensor)
@@ -133,10 +135,7 @@ class BathroomFan(hass.Hass):
             else:
                 # Fan turned off manually, cancel the manual turn off timer
                 self.log("Fan turned off manually, cancelling manual turn off timer.")
-                if self.manual_turn_off_timer_handle:
-                    self.cancel_timer(self.manual_turn_off_timer_handle)
-                    self.timer_handle_list.remove(self.manual_turn_off_timer_handle)
-                    self.manual_turn_off_timer_handle = None
+                self.cancel_timer_handle("manual_turn_off_timer_handle")
             return
 
         if entity == self.actor and new == "on" and old != "on" and not self.auto_activated:
@@ -261,17 +260,8 @@ class BathroomFan(hass.Hass):
 
             self.turn_on(self.actor)
 
-        if self.humidity_turn_off_timer_handle:
-            self.log("Cancelling scheduled power off")
-            self.cancel_timer(self.humidity_turn_off_timer_handle)
-            self.timer_handle_list.remove(self.humidity_turn_off_timer_handle)
-            self.humidity_turn_off_timer_handle = None
-
-        if self.manual_turn_off_timer_handle:
-            self.log("Cancelling manual turn off timer")
-            self.cancel_timer(self.manual_turn_off_timer_handle)
-            self.timer_handle_list.remove(self.manual_turn_off_timer_handle)
-            self.manual_turn_off_timer_handle = None
+        self.cancel_timer_handle("humidity_turn_off_timer_handle")
+        self.cancel_timer_handle("manual_turn_off_timer_handle")
 
     def handle_fan_turn_off(self, humidity_difference, lower_threshold):
         """
