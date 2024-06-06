@@ -30,6 +30,7 @@ class BathroomFan(hass.Hass):
         self.manual_turn_off_timer_handle = None
         self.humidity_turn_off_timer_handle = None
         self.auto_activated = False  # Flag to track automatic activation
+        self.timer_turn_off = False  # Flag to track if the fan is turned off by a timer
 
         self.app_switch = self.args["app_switch"]
         self.bathroom_humidity_sensor = self.args["bathroom_humidity_sensor"]
@@ -107,7 +108,11 @@ class BathroomFan(hass.Hass):
         self.log(f"Absolute humidity difference: {humidity_difference}, Bathroom: {bathroom_absolute_humidity}, Living: {living_absolute_humidity}")
 
         if entity == self.actor and old == "on" and new == "off":
-            if self.auto_activated:
+            if self.timer_turn_off:
+                # Reset the timer turn off flag
+                self.timer_turn_off = False
+                self.log("Fan turned off by timer.")
+            elif self.auto_activated:
                 # Fan turned off manually after being auto-activated
                 self.log("Fan turned off manually after auto activation.")
                 self.auto_activated = False  # Reset the auto-activated flag
@@ -263,6 +268,7 @@ class BathroomFan(hass.Hass):
             kwargs (dict): Additional keyword arguments.
         """
         self.log(f"Turning off {self.friendly_name(self.actor)}")
+        self.timer_turn_off = True  # Set the timer turn off flag
         self.turn_off(self.actor)
         self.humidity_turn_off_timer_handle = None
         self.auto_activated = False  # Reset the auto-activated flag
@@ -287,6 +293,7 @@ class BathroomFan(hass.Hass):
             kwargs (dict): Additional keyword arguments containing humidity difference.
         """
         self.log(f"Manual turn off triggered. Current absolute humidity difference ({kwargs['humidity_difference']}) <= threshold ({self.threshold}).")
+        self.timer_turn_off = True  # Set the timer turn off flag
         self.turn_off(self.actor)
         self.manual_turn_off_timer_handle = None
 
