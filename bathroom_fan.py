@@ -100,7 +100,7 @@ class BathroomFan(hass.Hass):
             self.cancel_timer_handle("humidity_turn_off_timer_handle")
             return
 
-        humidity_difference = self.calculate_humidity_difference()
+        humidity_difference, bathroom_absolute_humidity, living_absolute_humidity = self.calculate_humidity_difference()
         if humidity_difference is None:
             return
 
@@ -169,19 +169,21 @@ class BathroomFan(hass.Hass):
         Calculates the humidity difference between the bathroom and living space.
 
         Returns:
-            float: The difference in absolute humidity between the bathroom and the living space, 
-                   or None if any sensor state is invalid.
+            tuple: The difference in absolute humidity between the bathroom and the living space,
+                   the bathroom absolute humidity, and the living space absolute humidity,
+                   or (None, None, None) if any sensor state is invalid.
         """
         bathroom_humidity, living_humidity, bathroom_temperature, living_temperature = self.get_valid_sensor_states()
 
         if None in (bathroom_humidity, living_humidity, bathroom_temperature, living_temperature):
             self.log("One or more sensor states are invalid. Skipping processing.")
-            return None
+            return None, None, None
 
         bathroom_absolute_humidity = self.calculate_absolute_humidity(bathroom_humidity, bathroom_temperature)
         living_absolute_humidity = self.calculate_absolute_humidity(living_humidity, living_temperature)
 
-        return bathroom_absolute_humidity - living_absolute_humidity
+        humidity_difference = bathroom_absolute_humidity - living_absolute_humidity
+        return humidity_difference, bathroom_absolute_humidity, living_absolute_humidity
 
     def calculate_absolute_humidity(self, relative_humidity, temperature):
         """
@@ -285,7 +287,7 @@ class BathroomFan(hass.Hass):
             kwargs (dict): Additional keyword arguments containing humidity difference.
         """
         humidity_difference = kwargs["humidity_difference"]
-        humidity_difference = self.calculate_humidity_difference()
+        humidity_difference, bathroom_absolute_humidity, living_absolute_humidity = self.calculate_humidity_difference()
         if humidity_difference is None:
             return
 
