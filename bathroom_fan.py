@@ -108,7 +108,7 @@ class BathroomFan(hass.Hass):
 
         self.log(f"Absolute humidity difference: {humidity_difference}, Bathroom: {bathroom_absolute_humidity}, Living: {living_absolute_humidity}")
 
-        if entity == self.actor and old == "on" and new == "off":
+        if entity == self.actor and old == "on" and new != "on":
             if self.timer_turn_off:
                 # Reset the timer turn off flag
                 self.timer_turn_off = False
@@ -252,7 +252,7 @@ class BathroomFan(hass.Hass):
             humidity_difference (float): The current humidity difference.
             lower_threshold (float): The lower threshold humidity difference for turning off the fan.
         """
-        if not self.humidity_turn_off_timer_handle and self.get_state(self.actor) != "off":
+        if not self.humidity_turn_off_timer_handle and self.get_state(self.actor) == "on":
             self.log(
                 f"{self.friendly_name(self.bathroom_humidity_sensor)} absolute humidity is {humidity_difference} higher than "
                 f"{self.friendly_name(self.living_humidity_sensor)}. This is within lower threshold of {lower_threshold}."
