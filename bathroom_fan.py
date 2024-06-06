@@ -98,9 +98,11 @@ class BathroomFan(hass.Hass):
             self.log("App switch is off, cancelling all timers and stopping further processing.")
             if self.manual_turn_off_timer_handle:
                 self.cancel_timer(self.manual_turn_off_timer_handle)
+                self.timer_handle_list.remove(self.manual_turn_off_timer_handle)
                 self.manual_turn_off_timer_handle = None
             if self.humidity_turn_off_timer_handle:
                 self.cancel_timer(self.humidity_turn_off_timer_handle)
+                self.timer_handle_list.remove(self.humidity_turn_off_timer_handle)
                 self.humidity_turn_off_timer_handle = None
             return
 
