@@ -270,6 +270,8 @@ class BathroomFan(hass.Hass):
         self.log(f"Turning off {self.friendly_name(self.actor)}")
         self.timer_turn_off = True  # Set the timer turn off flag
         self.turn_off(self.actor)
+        if self.humidity_turn_off_timer_handle in self.timer_handle_list:
+            self.timer_handle_list.remove(self.humidity_turn_off_timer_handle)
         self.humidity_turn_off_timer_handle = None
         self.auto_activated = False  # Reset the auto-activated flag
 
@@ -295,6 +297,8 @@ class BathroomFan(hass.Hass):
         self.log(f"Manual turn off triggered. Current absolute humidity difference ({kwargs['humidity_difference']}) <= threshold ({self.threshold}).")
         self.timer_turn_off = True  # Set the timer turn off flag
         self.turn_off(self.actor)
+        if self.manual_turn_off_timer_handle in self.timer_handle_list:
+            self.timer_handle_list.remove(self.manual_turn_off_timer_handle)
         self.manual_turn_off_timer_handle = None
 
     def cancel_timer_handle(self, timer_handle_name):
