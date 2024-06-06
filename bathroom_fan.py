@@ -104,7 +104,7 @@ class BathroomFan(hass.Hass):
         if humidity_difference is None:
             return
 
-        self.log(f"Absolute humidity difference: {humidity_difference}")
+        self.log(f"Absolute humidity difference: {humidity_difference}, Bathroom: {bathroom_absolute_humidity}, Living: {living_absolute_humidity}")
 
         if entity == self.actor and old == "on" and new == "off":
             if self.auto_activated:
