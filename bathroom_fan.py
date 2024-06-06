@@ -146,7 +146,8 @@ class BathroomFan(hass.Hass):
             if humidity_difference > self.threshold:
                 self.handle_fan_turn_on(humidity_difference, self.threshold)
             elif humidity_difference <= self.lower_threshold:
-                self.handle_fan_turn_off(humidity_difference, self.lower_threshold)
+                if not self.manual_turn_off_timer_handle:
+                    self.handle_fan_turn_off(humidity_difference, self.lower_threshold)
 
     def get_valid_state(self, entity):
         """
@@ -263,6 +264,12 @@ class BathroomFan(hass.Hass):
             self.cancel_timer(self.humidity_turn_off_timer_handle)
             self.timer_handle_list.remove(self.humidity_turn_off_timer_handle)
             self.humidity_turn_off_timer_handle = None
+
+        if self.manual_turn_off_timer_handle:
+            self.log("Cancelling manual turn off timer")
+            self.cancel_timer(self.manual_turn_off_timer_handle)
+            self.timer_handle_list.remove(self.manual_turn_off_timer_handle)
+            self.manual_turn_off_timer_handle = None
 
     def handle_fan_turn_off(self, humidity_difference, lower_threshold):
         """
