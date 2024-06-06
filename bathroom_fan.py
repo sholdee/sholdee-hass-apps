@@ -108,10 +108,7 @@ class BathroomFan(hass.Hass):
             self.cancel_timer_handle("humidity_turn_off_timer_handle")
             return
 
-        bathroom_humidity = self.get_valid_state(self.bathroom_humidity_sensor)
-        living_humidity = self.get_valid_state(self.living_humidity_sensor)
-        bathroom_temperature = self.get_valid_state(self.bathroom_temperature_sensor)
-        living_temperature = self.get_valid_state(self.living_temperature_sensor)
+        bathroom_humidity, living_humidity, bathroom_temperature, living_temperature = self.get_valid_sensor_states()
 
         if None in (bathroom_humidity, living_humidity, bathroom_temperature, living_temperature):
             self.log("One or more sensor states are invalid. Skipping processing.")
@@ -149,6 +146,20 @@ class BathroomFan(hass.Hass):
             elif humidity_difference <= self.lower_threshold:
                 if not self.manual_turn_off_timer_handle:
                     self.handle_fan_turn_off(humidity_difference, self.lower_threshold)
+
+    def get_valid_sensor_states(self):
+        """
+        Retrieves and validates the states of all relevant sensors.
+
+        Returns:
+            tuple: Valid states of bathroom humidity, living humidity, bathroom temperature, living temperature.
+        """
+        bathroom_humidity = self.get_valid_state(self.bathroom_humidity_sensor)
+        living_humidity = self.get_valid_state(self.living_humidity_sensor)
+        bathroom_temperature = self.get_valid_state(self.bathroom_temperature_sensor)
+        living_temperature = self.get_valid_state(self.living_temperature_sensor)
+
+        return bathroom_humidity, living_humidity, bathroom_temperature, living_temperature
 
     def get_valid_state(self, entity):
         """
@@ -219,10 +230,7 @@ class BathroomFan(hass.Hass):
             kwargs (dict): Additional keyword arguments containing humidity difference.
         """
         humidity_difference = kwargs["humidity_difference"]
-        current_bathroom_humidity = self.get_valid_state(self.bathroom_humidity_sensor)
-        current_living_humidity = self.get_valid_state(self.living_humidity_sensor)
-        current_bathroom_temperature = self.get_valid_state(self.bathroom_temperature_sensor)
-        current_living_temperature = self.get_valid_state(self.living_temperature_sensor)
+        current_bathroom_humidity, current_living_humidity, current_bathroom_temperature, current_living_temperature = self.get_valid_sensor_states()
 
         if None in (current_bathroom_humidity, current_living_humidity, current_bathroom_temperature, current_living_temperature):
             self.log("One or more sensor states are invalid. Skipping processing.")
