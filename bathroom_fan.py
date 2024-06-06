@@ -8,7 +8,7 @@ Args:
     bathroom_humidity_sensor: bathroom humidity sensor to monitor. eg: sensor.4_in_1_sensor_humidity
     bathroom_temperature_sensor: bathroom temperature sensor. eg: sensor.4_in_1_sensor_air_temperature
     living_humidity_sensor: living space humidity sensor to monitor. eg: sensor.temp_sensor_upper_humidity
-    living_temperature_sensor: living temperature sensor. eg: sensor.temp_sensor_upper_air_temperature
+    living_temperature_sensor: living space temperature sensor. eg: sensor.temp_sensor_upper_air_temperature
     temperature_unit: the temperature unit (F/C) of sensor data. eg: F
     threshold: the absolute humidity threshold at which fan is activated. (g/m³) eg: 3.54
     lower_threshold: the absolute humidity threshold at which fan power off is scheduled. (g/m³) eg: 1.377
@@ -106,13 +106,20 @@ class BathroomFan(hass.Hass):
     
         self.log(f"Absolute humidity difference: {humidity_difference} (Bathroom: {bathroom_absolute_humidity}, Living: {living_absolute_humidity})")
     
-        if entity == self.actor and old == "on" and new == "off" and self.auto_activated:
-            # Fan turned off manually after being auto-activated
-            self.log("Fan turned off manually after auto activation.")
-            self.auto_activated = False  # Reset the auto-activated flag
-            # Re-evaluate humidity to check if the fan should be turned on again
-            if humidity_difference > self.threshold:
-                self.handle_fan_turn_on(humidity_difference, self.threshold)
+        if entity == self.actor and old == "on" and new == "off":
+            if self.auto_activated:
+                # Fan turned off manually after being auto-activated
+                self.log("Fan turned off manually after auto activation.")
+                self.auto_activated = False  # Reset the auto-activated flag
+                # Re-evaluate humidity to check if the fan should be turned on again
+                if humidity_difference > self.threshold:
+                    self.handle_fan_turn_on(humidity_difference, self.threshold)
+            else:
+                # Fan turned off manually, cancel the manual turn off timer
+                self.log("Fan turned off manually, cancelling manual turn off timer.")
+                if self.manual_turn_off_timer_handle:
+                    self.cancel_timer(self.manual_turn_off_timer_handle)
+                    self.manual_turn_off_timer_handle = None
             return
     
         if entity == self.actor and new == "on" and old != "on" and not self.auto_activated:
