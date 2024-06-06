@@ -247,13 +247,15 @@ class BathroomFan(hass.Hass):
             humidity_difference (float): The current humidity difference.
             threshold (float): The threshold humidity difference for turning on the fan.
         """
+        self.auto_activated = True  # Mark as auto-activated
+
         if self.get_state(self.actor) != "on":
             self.log(
                 f"{self.friendly_name(self.bathroom_humidity_sensor)} absolute humidity is {humidity_difference} higher than "
                 f"{self.friendly_name(self.living_humidity_sensor)}. This is above threshold of {threshold}."
             )
             self.log(f"Turning on {self.friendly_name(self.actor)}")
-            self.auto_activated = True  # Mark as auto-activated
+
             self.turn_on(self.actor)
 
         if self.humidity_turn_off_timer_handle:
