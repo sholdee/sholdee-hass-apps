@@ -165,7 +165,13 @@ class BathroomFan(hass.Hass):
         return None
 
     def calculate_humidity_difference(self):
-        """Calculates the humidity difference between the bathroom and living space."""
+        """
+        Calculates the humidity difference between the bathroom and living space.
+
+        Returns:
+            float: The difference in absolute humidity between the bathroom and the living space, 
+                   or None if any sensor state is invalid.
+        """
         bathroom_humidity, living_humidity, bathroom_temperature, living_temperature = self.get_valid_sensor_states()
 
         if None in (bathroom_humidity, living_humidity, bathroom_temperature, living_temperature):
@@ -292,7 +298,12 @@ class BathroomFan(hass.Hass):
         self.manual_turn_off_timer_handle = None
 
     def cancel_timer_handle(self, timer_handle_name):
-        """Cancels a timer and removes it from the timer handle list."""
+        """
+        Cancels a timer and removes it from the timer handle list.
+
+        Args:
+            timer_handle_name (str): The name of the timer handle attribute to be cancelled and removed.
+        """
         timer_handle = getattr(self, timer_handle_name)
         if timer_handle:
             self.cancel_timer(timer_handle)
