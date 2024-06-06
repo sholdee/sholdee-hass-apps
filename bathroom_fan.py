@@ -88,18 +88,18 @@ class BathroomFan(hass.Hass):
         """
         self.log(f"State change detected for {entity}: {old} -> {new}")
 
-        if entity == self.app_switch and old != "on" and new == "on":
+        if entity == self.app_switch and old == "off" and new == "on":
             self.log("App switch turned on, checking fan state.")
             if self.get_state(self.actor) == "on" and not self.auto_activated:
                 self.log("Fan is on but not auto-activated, scheduling manual turn off.")
                 self.schedule_manual_turn_off(0)  # 0 used as a placeholder for humidity difference
-        elif entity == self.app_switch and old == "on" and new != "on":
+        elif entity == self.app_switch and old == "on" and new == "off":
             # Cancel all timers and stop further processing
             self.log("App switch turned off, cancelling all timers and stopping further processing.")
             self.cancel_timer_handle("manual_turn_off_timer_handle")
             self.cancel_timer_handle("humidity_turn_off_timer_handle")
 
-        if self.get_state(self.app_switch) != "on":
+        if self.get_state(self.app_switch) == "off":
             return
 
         humidity_difference, bathroom_absolute_humidity, living_absolute_humidity = self.calculate_humidity_difference()
@@ -108,7 +108,7 @@ class BathroomFan(hass.Hass):
 
         self.log(f"Absolute humidity difference: {humidity_difference}, Bathroom: {bathroom_absolute_humidity}, Living: {living_absolute_humidity}")
 
-        if entity == self.actor and old == "on" and new != "on":
+        if entity == self.actor and old == "on" and new == "off":
             if self.timer_turn_off:
                 # Reset the timer turn off flag
                 self.timer_turn_off = False
@@ -126,7 +126,7 @@ class BathroomFan(hass.Hass):
                 self.cancel_timer_handle("manual_turn_off_timer_handle")
             return
 
-        if entity == self.actor and new == "on" and old != "on" and not self.auto_activated:
+        if entity == self.actor and new == "on" and old == "off" and not self.auto_activated:
             # Fan turned on manually
             self.log("Fan turned on manually, scheduling turn off if absolute humidity does not rise above threshold.")
             self.schedule_manual_turn_off(humidity_difference)
@@ -232,7 +232,7 @@ class BathroomFan(hass.Hass):
         """
         self.auto_activated = True  # Mark as auto-activated
 
-        if self.get_state(self.actor) != "on":
+        if self.get_state(self.actor) == "off":
             self.log(
                 f"{self.friendly_name(self.bathroom_humidity_sensor)} absolute humidity is {humidity_difference} higher than "
                 f"{self.friendly_name(self.living_humidity_sensor)}. This is above threshold of {threshold}."
