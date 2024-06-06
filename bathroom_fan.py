@@ -286,17 +286,8 @@ class BathroomFan(hass.Hass):
         Args:
             kwargs (dict): Additional keyword arguments containing humidity difference.
         """
-        humidity_difference = kwargs["humidity_difference"]
-        humidity_difference, bathroom_absolute_humidity, living_absolute_humidity = self.calculate_humidity_difference()
-        if humidity_difference is None:
-            return
-
-        if humidity_difference <= self.threshold:
-            self.log(f"Manual turn off triggered. Current absolute humidity difference ({humidity_difference}) <= threshold ({self.threshold}).")
-            self.turn_off(self.actor)
-        else:
-            self.log(f"Absolute humidity has risen above the threshold during the delay period. Current absolute humidity difference: {humidity_difference}")
-
+        self.log(f"Manual turn off triggered. Current absolute humidity difference ({kwargs['humidity_difference']}) <= threshold ({self.threshold}).")
+        self.turn_off(self.actor)
         self.manual_turn_off_timer_handle = None
 
     def cancel_timer_handle(self, timer_handle_name):
