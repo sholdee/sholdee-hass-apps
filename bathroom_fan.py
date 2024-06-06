@@ -88,17 +88,18 @@ class BathroomFan(hass.Hass):
         """
         self.log(f"State change detected for {entity}: {old} -> {new}")
 
-        if entity == self.app_switch and old == "off" and new == "on":
+        if entity == self.app_switch and old != "on" and new == "on":
             self.log("App switch turned on, checking fan state.")
             if self.get_state(self.actor) == "on" and not self.auto_activated:
                 self.log("Fan is on but not auto-activated, scheduling manual turn off.")
                 self.schedule_manual_turn_off(0)  # 0 used as a placeholder for humidity difference
-
-        if self.get_state(self.app_switch) != "on":
+        elif entity == self.app_switch and old == "on" and new != "on":
             # Cancel all timers and stop further processing
-            self.log("App switch is off, cancelling all timers and stopping further processing.")
+            self.log("App switch turned off, cancelling all timers and stopping further processing.")
             self.cancel_timer_handle("manual_turn_off_timer_handle")
             self.cancel_timer_handle("humidity_turn_off_timer_handle")
+
+        if self.get_state(self.app_switch) != "on":
             return
 
         humidity_difference, bathroom_absolute_humidity, living_absolute_humidity = self.calculate_humidity_difference()
