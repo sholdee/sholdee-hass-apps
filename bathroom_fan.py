@@ -22,7 +22,7 @@ import math
 
 class BathroomFan(hass.Hass):
     """Class to control bathroom exhaust fan based on humidity levels."""
-    
+
     def initialize(self):
         """Initializes the BathroomFan app."""
         self.listen_state_handle_list = []
@@ -77,7 +77,7 @@ class BathroomFan(hass.Hass):
     def state_change(self, entity, attribute, old, new, kwargs):
         """
         Handles state changes for monitored entities.
-        
+
         Args:
             entity (str): The entity that changed state.
             attribute (str): The attribute that changed.
@@ -86,26 +86,34 @@ class BathroomFan(hass.Hass):
             kwargs (dict): Additional keyword arguments.
         """
         self.log(f"State change detected for {entity}: {old} -> {new}")
-    
+
         if self.get_state(self.app_switch) != "on":
+            # Cancel all timers and stop further processing
+            self.log("App switch is off, cancelling all timers and stopping further processing.")
+            if self.manual_turn_off_timer_handle:
+                self.cancel_timer(self.manual_turn_off_timer_handle)
+                self.manual_turn_off_timer_handle = None
+            if self.humidity_turn_off_timer_handle:
+                self.cancel_timer(self.humidity_turn_off_timer_handle)
+                self.humidity_turn_off_timer_handle = None
             return
-    
+
         bathroom_humidity = self.get_valid_state(self.bathroom_humidity_sensor)
         living_humidity = self.get_valid_state(self.living_humidity_sensor)
         bathroom_temperature = self.get_valid_state(self.bathroom_temperature_sensor)
         living_temperature = self.get_valid_state(self.living_temperature_sensor)
-    
+
         if None in (bathroom_humidity, living_humidity, bathroom_temperature, living_temperature):
             self.log("One or more sensor states are invalid. Skipping processing.")
             return
-    
+
         bathroom_absolute_humidity = self.calculate_absolute_humidity(bathroom_humidity, bathroom_temperature)
         living_absolute_humidity = self.calculate_absolute_humidity(living_humidity, living_temperature)
-    
+
         humidity_difference = bathroom_absolute_humidity - living_absolute_humidity
-    
+
         self.log(f"Absolute humidity difference: {humidity_difference} (Bathroom: {bathroom_absolute_humidity}, Living: {living_absolute_humidity})")
-    
+
         if entity == self.actor and old == "on" and new == "off":
             if self.auto_activated:
                 # Fan turned off manually after being auto-activated
@@ -119,9 +127,10 @@ class BathroomFan(hass.Hass):
                 self.log("Fan turned off manually, cancelling manual turn off timer.")
                 if self.manual_turn_off_timer_handle:
                     self.cancel_timer(self.manual_turn_off_timer_handle)
+                    self.timer_handle_list.remove(self.manual_turn_off_timer_handle)
                     self.manual_turn_off_timer_handle = None
             return
-    
+
         if entity == self.actor and new == "on" and old != "on" and not self.auto_activated:
             # Fan turned on manually
             self.log("Fan turned on manually, scheduling turn off if absolute humidity does not rise above threshold.")
@@ -136,10 +145,10 @@ class BathroomFan(hass.Hass):
     def get_valid_state(self, entity):
         """
         Retrieves and validates the state of a given entity.
-        
+
         Args:
             entity (str): The entity to retrieve the state from.
-        
+
         Returns:
             float: The valid state value or None if invalid.
         """
@@ -154,11 +163,11 @@ class BathroomFan(hass.Hass):
     def calculate_absolute_humidity(self, relative_humidity, temperature):
         """
         Calculates the absolute humidity from relative humidity and temperature.
-        
+
         Args:
             relative_humidity (float): The relative humidity percentage.
             temperature (float): The temperature.
-        
+
         Returns:
             float: The calculated absolute humidity in g/m³.
         """
@@ -185,7 +194,7 @@ class BathroomFan(hass.Hass):
     def schedule_manual_turn_off(self, humidity_difference):
         """
         Schedules the manual turn off of the fan.
-        
+
         Args:
             humidity_difference (float): The current humidity difference.
         """
@@ -197,7 +206,7 @@ class BathroomFan(hass.Hass):
     def manual_turn_off_callback(self, kwargs):
         """
         Callback for manually turning off the fan.
-        
+
         Args:
             kwargs (dict): Additional keyword arguments containing humidity difference.
         """
@@ -227,7 +236,7 @@ class BathroomFan(hass.Hass):
     def handle_fan_turn_on(self, humidity_difference, threshold):
         """
         Handles turning on the fan based on humidity difference.
-        
+
         Args:
             humidity_difference (float): The current humidity difference.
             threshold (float): The threshold humidity difference for turning on the fan.
@@ -240,7 +249,7 @@ class BathroomFan(hass.Hass):
             self.log(f"Turning on {self.friendly_name(self.actor)}")
             self.auto_activated = True  # Mark as auto-activated
             self.turn_on(self.actor)
-    
+
         if self.humidity_turn_off_timer_handle:
             self.log("Cancelling scheduled power off")
             self.cancel_timer(self.humidity_turn_off_timer_handle)
@@ -250,7 +259,7 @@ class BathroomFan(hass.Hass):
     def handle_fan_turn_off(self, humidity_difference, lower_threshold):
         """
         Handles turning off the fan based on humidity difference.
-        
+
         Args:
             humidity_difference (float): The current humidity difference.
             lower_threshold (float): The lower threshold humidity difference for turning off the fan.
@@ -267,7 +276,7 @@ class BathroomFan(hass.Hass):
     def turn_off_callback(self, kwargs):
         """
         Callback for turning off the fan.
-        
+
         Args:
             kwargs (dict): Additional keyword arguments.
         """
