@@ -2,7 +2,7 @@ bathroom_fan:
   module: bathroom_fan
   class: BathroomFan
   
-  app_switch: input_boolean.auto_bathroom_fan
+  #app_switch: input_boolean.auto_bathroom_fan
   bathroom_humidity_sensor: sensor.4_in_1_sensor_humidity
   bathroom_temperature_sensor: sensor.4_in_1_sensor_air_temperature
   living_humidity_sensor: sensor.temp_sensor_upper_humidity
