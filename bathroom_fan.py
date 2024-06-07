@@ -4,7 +4,8 @@ Calculates and compares absolute humidity between bathroom and living space
 Separate power off delays for either case of automatic or manual fan activation
 
 Args:
-    app_switch: on/off switch for this app. eg: input_boolean.auto_bathroom_fan
+    app_switch: optional on/off switch for this app. eg: input_boolean.auto_bathroom_fan
+                if undefined, this app will always be on
     bathroom_humidity_sensor: bathroom humidity sensor to monitor. eg: sensor.4_in_1_sensor_humidity
     bathroom_temperature_sensor: bathroom temperature sensor. eg: sensor.4_in_1_sensor_air_temperature
     living_humidity_sensor: living space humidity sensor to monitor. eg: sensor.temp_sensor_upper_humidity
@@ -32,7 +33,7 @@ class BathroomFan(hass.Hass):
         self.auto_activated = False  # Flag to track automatic activation
         self.timer_turn_off = False  # Flag to track if the fan is turned off by a timer
 
-        self.app_switch = self.args["app_switch"]
+        self.app_switch = self.args.get("app_switch", None)
         self.bathroom_humidity_sensor = self.args["bathroom_humidity_sensor"]
         self.living_humidity_sensor = self.args["living_humidity_sensor"]
         self.bathroom_temperature_sensor = self.args["bathroom_temperature_sensor"]
@@ -45,13 +46,16 @@ class BathroomFan(hass.Hass):
         self.manual_delay = int(self.args["manual_delay"])
 
         self.watched_entity_list = [
-            self.app_switch,
             self.bathroom_humidity_sensor,
             self.living_humidity_sensor,
             self.bathroom_temperature_sensor,
             self.living_temperature_sensor,
             self.actor
         ]
+
+        # Add app_switch to the watched entity list only if it is defined
+        if self.app_switch:
+            self.watched_entity_list.append(self.app_switch)
 
         for entity in self.watched_entity_list:
             self.listen_state_handle_list.append(
@@ -62,8 +66,9 @@ class BathroomFan(hass.Hass):
 
     def log_initial_state(self):
         """Logs the initial state of the app and sensors."""
+        app_switch_state = self.get_state(self.app_switch) if self.app_switch else "on"
         self.log(
-            f"Bathroom fan app initialized. App switch: {self.get_state(self.app_switch)} "
+            f"Bathroom fan app initialized. App switch: {app_switch_state} "
             f"Bathroom humidity: {self.get_state(self.bathroom_humidity_sensor)} "
             f"Living space humidity: {self.get_state(self.living_humidity_sensor)} "
             f"Bathroom temperature: {self.get_state(self.bathroom_temperature_sensor)} "
@@ -99,7 +104,7 @@ class BathroomFan(hass.Hass):
             self.cancel_timer_handle("manual_turn_off_timer_handle")
             self.cancel_timer_handle("humidity_turn_off_timer_handle")
 
-        if self.get_state(self.app_switch) == "off":
+        if self.app_switch and self.get_state(self.app_switch) == "off":
             return
 
         humidity_difference, bathroom_absolute_humidity, living_absolute_humidity = self.calculate_humidity_difference()
