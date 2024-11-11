@@ -15,8 +15,8 @@ Occupancy Simulator:
   random_kitchen_number: '3'
   random_kitchen_minduration: 00:05:00
   random_kitchen_maxduration: 01:00:00
-  random_kitchen_off_1: switch.kitchen_lights
-  random_kitchen_on_1: switch.kitchen_lights
+  random_kitchen_off_1: switch.kitchen_kitchen_lights_kitchen_kitchen_lights_switch
+  random_kitchen_on_1: switch.kitchen_kitchen_lights_kitchen_kitchen_lights_switch
   random_kitchen_end: Night
 
   random_livingroom_start: Evening
@@ -24,8 +24,8 @@ Occupancy Simulator:
   random_livingroom_number: '1'
   random_livingroom_minduration: 01:00:00
   random_livingroom_maxduration: 02:00:00
-  random_livingroom_off_1: light.living_room_light
-  random_livingroom_on_1: light.living_room_light
+  random_livingroom_off_1: light.living_room_living_room_light_living_room_living_room_light_dimmer
+  random_livingroom_on_1: light.living_room_living_room_light_living_room_living_room_light_dimmer
   random_livingroom_end: Night
 
   #random_bedroom_start: Evening
@@ -71,8 +71,8 @@ Occupancy Simulator:
   random_kitchenday_number: '1'
   random_kitchenday_minduration: 00:15:00
   random_kitchenday_maxduration: 01:00:00
-  random_kitchenday_off_1: switch.kitchen_lights
-  random_kitchenday_on_1: switch.kitchen_lights
+  random_kitchenday_off_1: switch.kitchen_kitchen_lights_kitchen_kitchen_lights_switch
+  random_kitchenday_on_1: switch.kitchen_kitchen_lights_kitchen_kitchen_lights_switch
   random_kitchenday_end: Mid morning
 
   step_midmorning_name: Mid morning

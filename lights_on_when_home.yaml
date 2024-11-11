@@ -7,6 +7,6 @@ lights_on_when_home:
     - group.hannah
 
   lights:
-    - switch.rear_floodlight
-    - switch.kitchen_lights_2
-    - switch.kitchen_lights
+    - switch.rear_porch_rear_floodlight_rear_porch_rear_floodlight_switch
+    - switch.rear_porch_interior_rear_porch_light_rear_porch_interior_rear_porch_light_switch
+    - switch.kitchen_kitchen_lights_kitchen_kitchen_lights_switch

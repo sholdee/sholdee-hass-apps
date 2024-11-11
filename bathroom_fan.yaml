@@ -3,13 +3,13 @@ bathroom_fan:
   class: BathroomFan
   
   #app_switch: input_boolean.auto_bathroom_fan
-  bathroom_humidity_sensor: sensor.4_in_1_sensor_humidity
-  bathroom_temperature_sensor: sensor.4_in_1_sensor_air_temperature
-  living_humidity_sensor: sensor.temp_sensor_upper_humidity
-  living_temperature_sensor: sensor.temp_sensor_upper_air_temperature
+  bathroom_humidity_sensor: sensor.bathroom_4_in_1_sensor_bathroom_4_in_1_sensor_humidity_air
+  bathroom_temperature_sensor: sensor.bathroom_4_in_1_sensor_bathroom_4_in_1_sensor_temperature_air
+  living_humidity_sensor: sensor.upstairs_hallway_temp_sensor_upper_upstairs_hallway_temp_sensor_upper_humidity_air
+  living_temperature_sensor: sensor.upstairs_hallway_temp_sensor_upper_upstairs_hallway_temp_sensor_upper_temperature_air
   temperature_unit: F
   threshold: 3.54
   lower_threshold: 1.377
-  actor: switch.bathroom_fan
+  actor: switch.bathroom_bathroom_fan_bathroom_bathroom_fan_switch
   delay: 60
   manual_delay: 600

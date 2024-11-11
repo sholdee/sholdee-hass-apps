@@ -26,7 +26,7 @@ schedy_heating:
         return state("input_boolean.guestmode")
     def outside_temp():
         try:
-            temp = float(state("sensor.temp_sensor_outside_air_temperature"))
+            temp = float(state("sensor.outside_temp_sensor_outside_outside_temp_sensor_outside_temperature_air"))
         except:
             try:
                 temp = float(state("sensor.weather_temperature"))
@@ -44,19 +44,19 @@ schedy_heating:
     def door_is_closed_for_long():
         return state("input_boolean.door_closed_long") == "on"
     def door_is_open():
-        return state("binary_sensor.sliding_door_sensor_window_door_is_open") == "on"
+        return state("binary_sensor.dining_room_sliding_door_sensor_dining_room_sliding_door_sensor_door_state_simple") == "on"
 
   watched_entities:
   - sensor.weather_temperature
   - input_boolean.guestmode
-  - sensor.temp_sensor_outside_air_temperature
+  - sensor.outside_temp_sensor_outside_outside_temp_sensor_outside_temperature_air
   - person.ethan
   - person.hannah
   - device_tracker.ethan_s23_unifi
   - device_tracker.hannah_s10
   - device_tracker.josh_phone
   - sensor.home_realfeel_temperature_max_0d
-  - binary_sensor.sliding_door_sensor_window_door_is_open
+  - binary_sensor.dining_room_sliding_door_sensor_dining_room_sliding_door_sensor_door_state_simple
   - input_boolean.door_open_long
   - input_boolean.door_closed_long
 

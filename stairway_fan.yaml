@@ -3,9 +3,9 @@ stairway_fan:
   class: StairwayFan
   
   app_switch: input_boolean.auto_stairway_fan
-  upper_temp_sensor: sensor.temp_sensor_upper_air_temperature
-  lower_temp_sensor: sensor.temp_sensor_lower_air_temperature
+  upper_temp_sensor: sensor.upstairs_hallway_temp_sensor_upper_upstairs_hallway_temp_sensor_upper_temperature_air
+  lower_temp_sensor: sensor.upstairs_hallway_temp_sensor_upper_upstairs_hallway_temp_sensor_upper_humidity_air
   threshold_entity: input_number.floor_temp_difference_threshold
   lower_threshold_entity: input_number.floor_temp_difference_lower_threshold
-  actor: switch.smart_plug
+  actor: switch.home_smart_plug_home_smart_plug_switch
   delay: 300
